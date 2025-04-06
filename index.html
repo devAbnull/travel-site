@@ -4,13 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Abhinam Travel Dreams</title>
+  <link href="./dist/output.css" rel="stylesheet">
 </head>
-<body>
-  <h1>Welcome to Abhinam Travel Dreams</h1>
-  <p>Your journey begins here!</p>
-  <div id="paragraphs-container"></div>
+<body class="bg-gradient-to-b from-blue-50 to-white min-h-screen text-gray-800 font-sans">
 
-  <!-- Link to the external JavaScript file -->
+  <div class="max-w-4xl mx-10 py-10">
+    <h1 class="text-4xl font-bold text-blue-700 mb-2">Abhinam Travel Dreams</h1>
+    <p class=" text-lg text-gray-600 mb-8">
+        A curated list of dream destinations we'd love to explore — from hidden gems to iconic landmarks. This is our little corner to track, dream, and get inspired for future adventures. Every place here is a promise to myself: to wander more, to learn deeply, and to never stop exploring.
+    </p>
+
+    <!-- Grid for travel list items -->
+    <div id="travel-grid" class="grid grid-cols-1 gap-4"></div>
+
+  </div>
+
   <script src="script.js"></script>
 </body>
 </html>
