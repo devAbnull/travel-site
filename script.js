@@ -1,138 +1,139 @@
 const travelItems = [
     {
-      title: "Hot air balloon in Cappadocia",
+      title: "Hot Air Balloon in Cappadocia",
       city: "Göreme",
       country: "Turkey",
-      description: "Experience the magical sunrise while floating above the fairy chimneys of Cappadocia. The surreal landscape, dotted with ancient caves and rock formations, makes it feel like you're in another world.",
-      image: "https://source.unsplash.com/800x500/?cappadocia,balloon"
+      description: "Floating over the otherworldly landscape of Cappadocia at sunrise is a surreal experience unlike any other. The region is famed for its 'fairy chimneys'—tall, thin spires of rock that rise from the earth, creating an alien-looking terrain. As the sun rises, dozens of colorful hot air balloons fill the sky, creating a magical spectacle of movement and light. It’s peaceful, breathtaking, and feels almost like drifting through a dream. Cappadocia also offers charming cave hotels, rich Turkish culture, and delicious food to complete the adventure.",
+      image: "path_to_images/cappadocia.jpg"
     },
     {
       title: "Disneyland in Hong Kong",
       city: "Lantau Island",
       country: "Hong Kong",
-      description: "Step into a world of enchantment with thrilling rides, parades, and your favorite Disney characters. The fireworks show is an unforgettable highlight for all ages.",
-      image: "https://source.unsplash.com/800x500/?disneyland,hongkong"
+      description: "Hong Kong Disneyland is a whimsical retreat for both kids and adults who grew up watching Disney classics. The park blends iconic Disney magic with local cultural flair, creating a uniquely charming experience. Whether you're riding Space Mountain, watching the parade with beloved characters, or soaking in the nightly fireworks over Sleeping Beauty Castle, the park offers a full day of wonder. Nestled in the lush greenery of Lantau Island, it's also a scenic escape from the city's bustling core, perfect for some joyful, shared memories.",
+      image: "path_to_images/disney_hongkong.jpg"
     },
     {
-      title: "Grand Canyon in US",
+      title: "Grand Canyon in USA",
       city: "Arizona",
       country: "USA",
-      description: "Marvel at the immense beauty and scale of this natural wonder carved by the Colorado River. The sunset views from the South Rim are simply unforgettable.",
-      image: "https://source.unsplash.com/800x500/?grand-canyon"
+      description: "The Grand Canyon, carved over millions of years by the mighty Colorado River, is a natural masterpiece of staggering proportions. Its layered red rocks tell the story of Earth’s geological past, and its vastness is humbling. Hiking the trails, especially the Bright Angel or South Kaibab, gives you a deeper appreciation of its scale and beauty. For the ultimate experience, catch the sunrise or sunset from the South Rim and watch the colors shift across the canyon walls. Helicopter rides and white-water rafting add thrilling perspectives to this iconic destination.",
+      image: "path_to_images/grand_canyon.jpg"
     },
     {
-      title: "Northern lights in Norway",
+      title: "Northern Lights in Norway",
       city: "Tromsø",
       country: "Norway",
-      description: "Watch the night sky explode into colors as the aurora borealis dances above. Tromsø is one of the best places to catch this cosmic spectacle in a cozy Arctic town.",
-      image: "https://source.unsplash.com/800x500/?northern-lights,norway"
+      description: "Tromsø, located above the Arctic Circle, is one of the best places on Earth to witness the aurora borealis. These dancing lights in the sky—shimmering greens, purples, and blues—are nature’s own light show, caused by particles from the sun colliding with the Earth's atmosphere. In the stillness of a dark, snowy landscape, the spectacle feels almost spiritual. Beyond the lights, Tromsø offers cozy wooden cabins, husky sledding, Sami culture, and stunning fjords—making it a winter wonderland worth exploring.",
+      image: "path_to_images/northern_lights.jpg"
     },
     {
       title: "Tomorrowland",
       city: "Boom",
       country: "Belgium",
-      description: "Join the world’s largest EDM festival in a fairy-tale themed atmosphere with epic stage setups. It's a once-in-a-lifetime celebration of music, energy, and togetherness.",
-      image: "https://source.unsplash.com/800x500/?tomorrowland,festival"
+      description: "Tomorrowland isn’t just a music festival—it’s a global pilgrimage for electronic dance music lovers. Held in the small town of Boom, Belgium, this festival transforms into a fantasy world filled with massive, storybook-like stages, vibrant decor, and a unifying atmosphere of joy and love. DJs from around the world headline the event, and attendees represent virtually every nation. The immersive experience, paired with world-class sound and visuals, makes it feel like you’ve stepped into a parallel dimension of music and togetherness.",
+      image: "path_to_images/tomorrowland.jpg"
     },
     {
-      title: "Cherry blossom in Japan",
+      title: "Cherry Blossom in Japan",
       city: "Kyoto",
       country: "Japan",
-      description: "Witness delicate sakura petals fill the streets in a sea of pink. Strolling along the Philosopher’s Path during blossom season feels like walking through a painting.",
-      image: "https://source.unsplash.com/800x500/?cherry-blossom,japan"
+      description: "Each spring, Japan transforms into a pink and white wonderland as cherry blossoms bloom across the country. Kyoto, with its historic temples, wooden teahouses, and tranquil gardens, is one of the best places to witness this breathtaking natural event. Locals and travelers alike enjoy hanami—picnicking beneath the cherry trees—as a celebration of life’s fleeting beauty. The soft petals dancing in the breeze against a backdrop of ancient architecture make for unforgettable moments.",
+      image: "path_to_images/cherry_blossom.jpg"
     },
     {
-      title: "Blue Grotto Italy",
+      title: "Blue Grotto",
       city: "Capri",
       country: "Italy",
-      description: "Sail into this glowing sea cave where sunlight hits the water and creates an ethereal blue glow. It’s a hidden gem that feels almost otherworldly.",
-      image: "https://source.unsplash.com/800x500/?blue-grotto,italy"
+      description: "The Blue Grotto in Capri is a stunning sea cave known for its ethereal blue glow. As sunlight filters through the underwater entrance, it illuminates the water in the cave, creating an electric-blue effect that feels like pure magic. Accessible only by a small rowboat, the experience of ducking into the cave and floating on glowing waters is dreamlike. The island of Capri itself is a Mediterranean gem with chic cafes, lush landscapes, and ancient Roman ruins.",
+      image: "path_to_images/blue_grotto.jpg"
     },
     {
-      title: "Eiffel Tower in Paris",
+      title: "Eiffel Tower",
       city: "Paris",
       country: "France",
-      description: "Enjoy a romantic moment atop Paris’s most iconic structure. The tower lights up every night in a dazzling sparkle that’s pure magic.",
-      image: "https://source.unsplash.com/800x500/?eiffel-tower,paris"
+      description: "The Eiffel Tower is not just a global icon of romance but a symbol of Parisian elegance and architectural brilliance. Standing tall over the Champ de Mars, it offers breathtaking panoramic views of the City of Light. Visiting at night when the tower sparkles every hour is a must-do experience. Whether you’re enjoying a picnic beneath it or sipping wine at its summit, the Eiffel Tower casts a charm that’s hard to resist.",
+      image: "path_to_images/eiffel_tower.jpg"
     },
     {
       title: "Great Wall of China",
       city: "Beijing",
       country: "China",
-      description: "Walk along the ancient stones of the Great Wall, stretching across dramatic landscapes. Each step echoes centuries of history and craftsmanship.",
-      image: "https://source.unsplash.com/800x500/?great-wall,china"
+      description: "The Great Wall of China stretches across thousands of kilometers and stands as a testament to the country's rich history and engineering prowess. Walking along its stone paths, you can feel the weight of centuries beneath your feet. The section near Mutianyu is both scenic and less crowded, making it perfect for a more tranquil trek. The surrounding mountains and endless wall segments snaking into the distance are awe-inspiring and humbling.",
+      image: "path_to_images/great_wall.jpg"
     },
     {
-      title: "Safari in South Africa",
+      title: "Safari",
       city: "Kruger National Park",
       country: "South Africa",
-      description: "Embark on an unforgettable wildlife adventure to spot lions, elephants, and rhinos. Safari lodges offer both luxury and closeness to nature.",
-      image: "https://source.unsplash.com/800x500/?safari,south-africa"
+      description: "A safari in Kruger National Park offers the chance to witness the 'Big Five'—lions, elephants, rhinos, leopards, and buffaloes—in their natural habitat. The raw beauty of the savannah, the golden sunsets, and the thrill of spotting wild animals up close makes this a once-in-a-lifetime experience. Guided game drives and luxurious lodges add comfort and expertise to your wild adventure.",
+      image: "path_to_images/safari.jpg"
     },
     {
       title: "New Year in Times Square",
-      city: "New York City",
+      city: "New York",
       country: "USA",
-      description: "Celebrate with millions under a shower of confetti as the iconic ball drops. It's a high-energy, bucket-list way to ring in the new year.",
-      image: "https://source.unsplash.com/800x500/?newyear,times-square"
+      description: "Welcoming the New Year in Times Square is an electrifying experience that draws people from all over the globe. As the famous ball drops and confetti rains down, the energy of the crowd is unmatched. Live performances, dazzling lights, and the pulse of New York City make it a celebration of hope, joy, and fresh beginnings. Just be sure to arrive early for a good spot!",
+      image: "path_to_images/times_square_nye.jpg"
     },
     {
-      title: "Niagara Falls in New York",
-      city: "Niagara",
+      title: "Niagara Falls",
+      city: "New York",
       country: "USA",
-      description: "Stand in awe as millions of gallons of water crash over the cliff edge. The Maid of the Mist boat ride brings you face to face with this mighty marvel.",
-      image: "https://source.unsplash.com/800x500/?niagara-falls"
+      description: "Niagara Falls is one of the most powerful and stunning natural wonders in North America. Whether viewed from the American side or across the border in Canada, the thundering roar and misty spray of the falls create an unforgettable sensory experience. Take a boat ride on the Maid of the Mist to get up close—or enjoy the nightly light show for a different kind of magic.",
+      image: "path_to_images/niagara_falls.jpg"
     },
     {
-      title: "Yosemite National Park in California",
-      city: "Yosemite Valley",
+      title: "Yosemite National Park",
+      city: "California",
       country: "USA",
-      description: "Explore waterfalls, giant sequoias, and granite cliffs like El Capitan. A nature lover’s paradise with endless trails and photo ops.",
-      image: "https://source.unsplash.com/800x500/?yosemite"
+      description: "Yosemite’s towering granite cliffs, waterfalls, and ancient sequoias offer a paradise for nature lovers and hikers. Iconic spots like El Capitan and Half Dome are breathtaking whether you’re climbing, photographing, or simply admiring. The park's diversity—from lush meadows to snow-capped peaks—makes it a top destination for adventure, reflection, and natural beauty.",
+      image: "path_to_images/yosemite.jpg"
     },
     {
-      title: "Great Barrier Reef Australia",
-      city: "Cairns",
+      title: "Great Barrier Reef",
+      city: "Queensland",
       country: "Australia",
-      description: "Dive into an underwater world of vibrant corals and marine life. Snorkeling here is like swimming in a living, breathing painting.",
-      image: "https://source.unsplash.com/800x500/?great-barrier-reef,australia"
+      description: "The Great Barrier Reef is the world’s largest coral reef system and a UNESCO World Heritage site teeming with marine life. Snorkeling or diving here reveals vibrant corals, sea turtles, and a rainbow of tropical fish. The reef’s fragility adds urgency to its beauty, reminding us to cherish and protect such wonders. Many tours also include glass-bottom boats and island stops for a full reef experience.",
+      image: "path_to_images/great_barrier_reef.jpg"
     },
     {
-      title: "Machu Picchu in Peru",
-      city: "Cusco",
+      title: "Machu Picchu",
+      city: "Cusco Region",
       country: "Peru",
-      description: "Trek along the Inca Trail to discover this mystical mountain citadel. A site shrouded in clouds and mystery, Machu Picchu is simply breathtaking.",
-      image: "https://source.unsplash.com/800x500/?machu-picchu"
+      description: "Perched high in the Andes, Machu Picchu is a mystical Incan city that continues to captivate travelers. The journey to reach it—whether by train or trekking the Inca Trail—is as epic as the destination itself. The stone structures, terraced hills, and mist-covered mountains create a sacred and serene atmosphere, making it one of the world’s most iconic archaeological sites.",
+      image: "path_to_images/machu_picchu.jpg"
     },
     {
-      title: "Cruise in New Zealand Fiordland",
+      title: "Cruise in Fiordland",
       city: "Milford Sound",
       country: "New Zealand",
-      description: "Sail through towering fjords where waterfalls tumble down emerald cliffs. It’s a peaceful and majestic way to experience nature’s grandeur.",
-      image: "https://source.unsplash.com/800x500/?milford-sound,new-zealand"
+      description: "A cruise through Fiordland’s Milford Sound is a journey into dramatic fjords, towering cliffs, and cascading waterfalls. Often called the 'eighth wonder of the world,' the sound is rich with wildlife like dolphins and seals, and shrouded in mist that adds an eerie, magical feel. It’s a place where the grandeur of nature speaks for itself.",
+      image: "path_to_images/fiordland_cruise.jpg"
     },
     {
-      title: "Cruise emerald green water Vietnam",
+      title: "Emerald Water Cruise",
       city: "Ha Long Bay",
       country: "Vietnam",
-      description: "Explore mystical limestone islands on calm green waters. Overnight boat stays offer serenity and views that change with every turn.",
-      image: "https://source.unsplash.com/800x500/?halong-bay,vietnam"
+      description: "Ha Long Bay’s emerald waters and limestone karsts form a seascape so surreal, it’s often featured in films and postcards. Cruising here among the cliffs and caves is both tranquil and visually mesmerizing. Some boats offer overnight stays, allowing you to wake up to the soft glow of sunrise over the water—a serene and unforgettable moment.",
+      image: "path_to_images/halong_bay.jpg"
     },
     {
-      title: "Tulip Festival in Netherlands",
+      title: "Tulip Festival",
       city: "Lisse",
       country: "Netherlands",
-      description: "Walk through rainbow fields of tulips in bloom. Keukenhof Gardens showcases Dutch floral beauty at its finest each spring.",
-      image: "https://source.unsplash.com/800x500/?tulip,netherlands"
+      description: "Each spring, the Keukenhof Gardens in Lisse burst into a kaleidoscope of color during the Tulip Festival. Millions of tulips bloom in stunning patterns, showcasing the Netherlands’ rich horticultural heritage. Strolling through the gardens or biking past the endless flower fields nearby is a visual treat and a breath of fresh, floral air.",
+      image: "path_to_images/tulip_festival.jpg"
     },
     {
-      title: "Hormuz Island in Iran",
+      title: "Hormuz Island",
       city: "Hormuz",
       country: "Iran",
-      description: "Explore this volcanic island painted in red, yellow, and orange hues. Its salt formations, colorful soil, and beaches feel almost extraterrestrial.",
-      image: "https://source.unsplash.com/800x500/?hormuz,iran"
+      description: "Hormuz Island, known for its colorful landscapes and red beaches, is like a painter’s palette come to life. The island’s otherworldly terrain is rich in minerals that color the soil with vibrant reds, yellows, and purples. A visit here feels like stepping onto Mars. With a blend of Persian heritage and natural art, Hormuz offers a truly off-the-beaten-path experience.",
+      image: "path_to_images/hormuz_island.jpg"
     }
   ];
+  
   
   
   const grid = document.getElementById("travel-grid");
