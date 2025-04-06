@@ -131,7 +131,15 @@ const travelItems = [
       country: "Iran",
       description: "Hormuz Island, known for its colorful landscapes and red beaches, is like a painter’s palette come to life. The island’s otherworldly terrain is rich in minerals that color the soil with vibrant reds, yellows, and purples. A visit here feels like stepping onto Mars. With a blend of Persian heritage and natural art, Hormuz offers a truly off-the-beaten-path experience.",
       image: "path_to_images/hormuz_island.jpg"
-    }
+    },
+    {
+        title: "Grand Canyon in USA",
+        city: "Arizona",
+        country: "USA",
+        description: "The Grand Canyon is a natural marvel carved over millions of years by the Colorado River. Its vastness and depth are awe-inspiring, with layered red rock formations that tell the geological story of Earth’s past. Whether you're standing on the South Rim watching the sun paint the canyon walls with golden light or hiking down into the depths to the Colorado River, the sense of scale is humbling. Activities like mule rides, helicopter tours, and river rafting provide unique perspectives of this majestic wonder. It's not just a scenic destination—it's an experience of time, nature, and raw beauty.",
+        image: "path_to_images/grand_canyon.jpg"
+      }
+      
   ];
   
   
