@@ -1,154 +1,239 @@
 # Stock Trade Decider — Plan
 
-## What We Have
+## What We Have (Inputs)
 
-| Input | Description |
-|-------|-------------|
-| `pattern` | Detected chart/signal pattern (e.g. breakout, reversal, momentum) |
-| `confidence_score` | 0–100 score expressing conviction in the pattern |
+| Input | Source | Description |
+|-------|--------|-------------|
+| `pattern` | Upstream | Detected chart/signal pattern (e.g. breakout, reversal, momentum) |
+| `confidence_score` | Upstream | 0–100, purely stock-level technical conviction |
+| `sector` | Upstream | Sector the stock belongs to (e.g. Technology, Energy) |
+| `sector_trend` | Upstream | Overall sector direction: `bullish / neutral / bearish` |
+| `entry_price` | Market data | Current price at signal time |
+| `atr` | Market data | ATR(14) — average true range, measures volatility |
+
+> **Note:** `confidence_score` is stock-level only (pattern + price action).
+> Sector context is **not** pre-baked into it — the decider must factor it in.
 
 ---
 
 ## What We're Building
 
-A decision engine that answers two questions for every signal:
+A decision engine that answers:
 
-1. **How much to trade?** — Position sizing
-2. **When to get out?** — Exit conditions
+1. **Is this signal worth acting on?** — Entry qualification
+2. **How much to trade?** — Position sizing
+3. **When to get out?** — Exit conditions *(next phase)*
 
 ---
 
-## 1. Position Sizing
+## 1. Effective Confidence (Sector Alignment Adjustment)
 
-### Core Formula
-Position size is driven by **risk per trade** and **confidence-weighted allocation**.
+Before sizing, raw confidence is adjusted based on how well the stock's pattern
+aligns with its sector trend. A bullish signal in a bearish sector is weaker
+than it appears — this step corrects for that.
 
 ```
-risk_per_trade   = portfolio_value × base_risk_pct        # e.g. 1% of $10k = $100
-confidence_mult  = confidence_score / 100                  # 0.0 – 1.0
-adjusted_risk    = risk_per_trade × confidence_mult        # scale risk by conviction
-stop_distance    = entry_price × stop_pct                  # e.g. 2% stop → $2 on $100 stock
-shares           = adjusted_risk / stop_distance
+sector_alignment_mult:
+  pattern direction == sector_trend → 1.10   (sector confirms signal, slight boost)
+  sector_trend == neutral           → 1.00   (no adjustment)
+  pattern direction != sector_trend → 0.75   (sector contradicts signal, penalize)
+
+effective_confidence = confidence_score × sector_alignment_mult
 ```
 
-### Sizing Tiers (draft)
+**Examples:**
 
-| Confidence | Risk Allocation | Notes |
-|------------|----------------|-------|
-| < 40%      | Skip / paper trade | Too uncertain |
-| 40–59%     | 0.5× base risk | Quarter-sized position |
-| 60–74%     | 1.0× base risk | Standard position |
-| 75–89%     | 1.5× base risk | Full position |
-| 90–100%    | 2.0× base risk | Max position (capped) |
+| Pattern | Sector Trend | Raw Confidence | Mult | Effective Confidence |
+|---------|-------------|----------------|------|----------------------|
+| Bull flag (bullish) | Bullish | 70 | 1.10 | 77 |
+| Bull flag (bullish) | Neutral  | 70 | 1.00 | 70 |
+| Bull flag (bullish) | Bearish  | 70 | 0.75 | 52.5 |
+| Bear flag (bearish) | Bearish  | 80 | 1.10 | 88 |
 
-### Constraints
-- **Max position size**: X% of portfolio (e.g. 5%) regardless of score
-- **Max concurrent positions**: N (e.g. 10)
-- **Sector concentration cap**: no more than Y% in one sector
+> This means sector data is not just a portfolio-level gate — it directly
+> influences signal quality and downstream sizing.
 
 ---
 
-## 2. Exit Conditions
+## 2. Entry Qualification Gates
 
-Three exit types work together — first trigger wins.
+All gates must pass. Evaluated in order — first failure = SKIP.
 
-### A. Stop Loss (Capital Protection)
-- **Fixed stop**: Entry − (ATR × multiplier), e.g. 1.5× ATR
-- **Pattern invalidation stop**: price level where the pattern is technically broken
-- Lower confidence → tighter stop
+```
+effective_confidence >= 40%          # min signal quality threshold
+open_positions < 10                  # portfolio capacity (configurable)
+sector_exposure < sector_cap (15%)   # concentration hard block
+stop_distance > 0                    # valid ATR available, stop can be placed
+```
 
-### B. Take Profit (Target)
-- **R:R based**: e.g. target 2R or 3R (2× or 3× the initial risk amount)
-- **Resistance levels**: nearest significant resistance from pattern analysis
-- Partial exits: take 50% off at 1.5R, let rest run to 3R
-
-### C. Trailing Stop (Protect Gains)
-- Activate once position is up ≥ 1R
-- Trail by ATR × 1.5 or a fixed % (e.g. 8%)
-- Locks in profit while allowing upside
-
-### D. Time-Based Exit (optional)
-- If trade hasn't hit target within N candles/days → exit flat
-- Prevents capital from being tied up in stalled trades
+**Sector exposure check:**
+```
+sector_exposure = sum(position_value) for all open trades in same sector
+                  ÷ portfolio_value
+```
 
 ---
 
-## 3. Decision Flow (High Level)
+## 3. Position Sizing
+
+Once entry is qualified, size is calculated in four steps:
+
+### Step 1 — Base Risk
+```
+risk_per_trade = portfolio_value × base_risk_pct     # e.g. 1% of $10k = $100
+```
+Fixed dollar amount you're willing to lose on this trade. Set once in config.
+
+### Step 2 — Confidence-Weighted Risk
+```
+confidence_mult = effective_confidence / 100
+adjusted_risk   = risk_per_trade × confidence_mult
+```
+Scales the bet by conviction. Higher effective confidence → larger risk allocation.
+
+### Step 3 — Sector Concentration Penalty
+```
+sector_penalty = 1 - sector_exposure        # e.g. 10% in sector → 0.90 multiplier
+adjusted_risk  = adjusted_risk × sector_penalty
+```
+Gradually reduces new position size as sector exposure grows — before hitting the hard cap.
+
+### Step 4 — Share Count
+```
+stop_distance = atr × atr_multiplier        # e.g. ATR(14) × 1.5
+shares        = floor(adjusted_risk / stop_distance)
+```
+Stop distance is ATR-based so it adapts to each stock's actual volatility.
+
+### Full Equation
+```
+effective_confidence = confidence_score × sector_alignment_mult
+adjusted_risk        = portfolio_value
+                       × base_risk_pct
+                       × (effective_confidence / 100)
+                       × (1 - sector_exposure)
+shares               = floor(adjusted_risk / (atr × atr_multiplier))
+```
+
+### Sizing Tiers (based on effective_confidence)
+
+| Effective Confidence | Position Scale | Notes |
+|----------------------|---------------|-------|
+| < 40%  | SKIP | Below quality threshold |
+| 40–59% | 0.5× | Weak signal, small bet |
+| 60–74% | 1.0× | Standard |
+| 75–89% | 1.5× | High conviction |
+| 90–100% | 2.0× | Max (hard-capped at 5% of portfolio) |
+
+---
+
+## 4. Decision Flow
 
 ```
 Signal arrives
-  ├── confidence < threshold?  → SKIP
-  ├── max positions reached?   → QUEUE / SKIP
-  ├── sector cap exceeded?     → SKIP
-  └── all clear?
-        ├── calculate stop_distance (ATR-based)
-        ├── calculate shares (risk-adjusted, confidence-weighted)
-        ├── calculate take_profit_target (R:R)
-        ├── set trailing_stop_trigger (1R activation)
-        └── ENTER trade with:
-              entry_price, shares, stop_loss, take_profit, trailing_stop
+  (pattern, confidence_score, sector, sector_trend, entry_price, atr)
+  │
+  ├─ Compute effective_confidence
+  │    = confidence_score × sector_alignment_mult
+  │
+  ├─ Entry Gates
+  │    effective_confidence >= 40%?      → else SKIP
+  │    open_positions < max_positions?   → else SKIP
+  │    sector_exposure < sector_cap?     → else SKIP
+  │    atr > 0?                          → else SKIP
+  │
+  ├─ Compute sizing
+  │    adjusted_risk = base_risk × confidence_mult × sector_penalty
+  │    shares        = floor(adjusted_risk / stop_distance)
+  │    cap shares    to max_position_pct of portfolio
+  │
+  └─ Output TradeDecision
 ```
 
 ---
 
-## 4. Outputs (Trade Decision Object)
+## 5. Output (TradeDecision Object)
 
 ```json
 {
-  "action": "BUY | SELL | SKIP",
+  "action": "BUY | SKIP",
   "ticker": "AAPL",
   "pattern": "bull_flag",
-  "confidence": 82,
+  "sector": "Technology",
+  "sector_trend": "bullish",
+  "raw_confidence": 70,
+  "sector_alignment_mult": 1.1,
+  "effective_confidence": 77,
+  "sizing_tier": "full",
   "entry_price": 175.00,
+  "atr": 3.20,
+  "stop_distance": 4.80,
   "shares": 14,
   "position_value": 2450.00,
-  "stop_loss": 171.50,
-  "take_profit": 182.00,
-  "trailing_stop_trigger": 178.50,
-  "risk_amount": 49.00,
-  "risk_pct_of_portfolio": 0.49,
-  "reward_risk_ratio": 2.0,
-  "sizing_tier": "full"
+  "stop_loss": 170.20,
+  "risk_amount": 67.20,
+  "risk_pct_of_portfolio": 0.67,
+  "skip_reason": null
 }
+```
+
+> Exit fields (`take_profit`, `trailing_stop`) will be added in next phase.
+
+---
+
+## 6. Config Parameters
+
+```yaml
+base_risk_pct: 0.01          # 1% of portfolio per trade
+min_confidence: 40           # effective confidence threshold
+atr_multiplier: 1.5          # stop = ATR × this
+max_positions: 10            # max concurrent open trades
+sector_cap_pct: 0.15         # 15% max sector exposure
+max_position_pct: 0.05       # single position capped at 5% of portfolio
+
+sector_alignment:
+  confirms: 1.10
+  neutral:  1.00
+  contradicts: 0.75
 ```
 
 ---
 
-## 5. Open Questions (to resolve before coding)
-
-1. **Pattern types** — what patterns does the upstream system produce? Do different patterns warrant different R:R targets?
-2. **ATR availability** — do we receive ATR with the signal, or do we compute it?
-3. **Portfolio context** — is portfolio value, open positions list, and sector data available at decision time?
-4. **Asset class** — stocks only, or also options/crypto? (changes sizing math significantly)
-5. **Execution** — does this output to a broker API, a CSV, or just a recommendation UI?
-6. **Backtesting** — should the system be able to replay historical signals to tune thresholds?
-
----
-
-## 6. Proposed Repo Structure
+## 7. Proposed Repo Structure
 
 ```
 stock-trade-decider/
 ├── src/
-│   ├── decider.py          # main entry point: signal → decision
+│   ├── decider.py          # main entry point: signal → TradeDecision
 │   ├── sizer.py            # position sizing logic
-│   ├── exits.py            # stop loss, take profit, trailing stop
-│   ├── portfolio.py        # portfolio state & constraints
-│   └── models.py           # data classes (Signal, Decision, Portfolio)
+│   ├── exits.py            # stop loss, take profit, trailing stop (next phase)
+│   ├── portfolio.py        # portfolio state: open positions, sector exposure
+│   └── models.py           # data classes: Signal, TradeDecision, Portfolio
 ├── tests/
 │   ├── test_sizer.py
 │   ├── test_exits.py
 │   └── test_decider.py
-├── config.yaml             # tunable parameters (risk%, tiers, ATR mult)
+├── config.yaml
 ├── README.md
 └── requirements.txt
 ```
 
 ---
 
+## 8. Open Questions
+
+1. **Pattern types** — what patterns does upstream produce? Different patterns may warrant different `sector_alignment_mult` values (e.g. reversal patterns might be penalized more on sector mismatch).
+2. **ATR source** — computed by upstream and passed in, or does the decider fetch it?
+3. **Asset class** — stocks only for now?
+4. **Execution target** — broker API, CSV output, or recommendation UI?
+
+---
+
 ## Next Steps
 
-- [ ] Review and answer Open Questions above
-- [ ] Agree on sizing tiers and R:R defaults
-- [ ] Decide on language / framework
-- [ ] Scaffold repo and implement `models.py` + `sizer.py` first
+- [x] Define inputs and effective confidence calculation
+- [x] Define entry qualification gates
+- [x] Define position sizing equations with sector factored in
+- [ ] Confirm config defaults and open questions
+- [ ] Define exit conditions (stop loss, take profit, trailing stop)
+- [ ] Scaffold repo and implement
