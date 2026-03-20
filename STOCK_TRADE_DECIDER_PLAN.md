@@ -9,7 +9,7 @@
 | `sector` | Upstream | Sector the stock belongs to (e.g. Technology, Energy) |
 | `sector_trend` | Upstream | Overall sector direction: `bullish / neutral / bearish` |
 | `entry_price` | Market data | Current price at signal time |
-| `atr` | Market data | ATR(14) — average true range, measures volatility |
+| `atr` | Upstream (input) | ATR(14) — passed in with signal, pre-computed upstream |
 
 > **Note:** `confidence_score` is stock-level only (pattern + price action).
 > Sector context is **not** pre-baked into it — the decider must factor it in.
@@ -26,36 +26,54 @@ A decision engine that answers:
 
 ---
 
-## 1. Effective Confidence (Sector Alignment Adjustment)
+## 1. Pattern Catalogue & Direction
 
-Before sizing, raw confidence is adjusted based on how well the stock's pattern
-aligns with its sector trend. A bullish signal in a bearish sector is weaker
-than it appears — this step corrects for that.
+Each pattern has an inherent direction. This drives the sector alignment check.
+
+| Pattern | Direction | Nature |
+|---------|-----------|--------|
+| `ascending_triangle` | Bullish | Continuation — higher lows pressing resistance |
+| `descending_triangle` | Bearish | Continuation — lower highs pressing support |
+| `rising_channel` | Bullish | Continuation — price trending up in parallel channel |
+| `falling_channel` | Bearish | Continuation — price trending down in parallel channel |
+
+> All four are **continuation patterns** — they assume the prevailing trend persists.
+> This matters for sector alignment: a continuation pattern *against* the sector
+> trend is a stronger warning signal than a reversal pattern would be.
+
+---
+
+## 2. Effective Confidence (Sector Alignment Adjustment)
+
+Before sizing, raw confidence is adjusted based on how well the pattern's
+direction aligns with its sector trend. A bullish continuation pattern in a
+bearish sector is structurally weaker — this step corrects for that.
 
 ```
 sector_alignment_mult:
-  pattern direction == sector_trend → 1.10   (sector confirms signal, slight boost)
+  pattern direction == sector_trend → 1.10   (sector confirms, boost)
   sector_trend == neutral           → 1.00   (no adjustment)
-  pattern direction != sector_trend → 0.75   (sector contradicts signal, penalize)
+  pattern direction != sector_trend → 0.75   (sector contradicts, penalize)
 
 effective_confidence = confidence_score × sector_alignment_mult
 ```
 
 **Examples:**
 
-| Pattern | Sector Trend | Raw Confidence | Mult | Effective Confidence |
-|---------|-------------|----------------|------|----------------------|
-| Bull flag (bullish) | Bullish | 70 | 1.10 | 77 |
-| Bull flag (bullish) | Neutral  | 70 | 1.00 | 70 |
-| Bull flag (bullish) | Bearish  | 70 | 0.75 | 52.5 |
-| Bear flag (bearish) | Bearish  | 80 | 1.10 | 88 |
+| Pattern | Direction | Sector Trend | Raw Confidence | Mult | Effective Confidence |
+|---------|-----------|-------------|----------------|------|----------------------|
+| ascending_triangle  | Bullish | Bullish | 70 | 1.10 | 77.0 |
+| ascending_triangle  | Bullish | Neutral | 70 | 1.00 | 70.0 |
+| ascending_triangle  | Bullish | Bearish | 70 | 0.75 | 52.5 → weak signal |
+| descending_triangle | Bearish | Bearish | 80 | 1.10 | 88.0 |
+| falling_channel     | Bearish | Bullish | 65 | 0.75 | 48.75 → near skip threshold |
 
-> This means sector data is not just a portfolio-level gate — it directly
-> influences signal quality and downstream sizing.
+> Since all patterns are continuations, a sector contradiction is a significant
+> red flag — the 0.75 penalty can push borderline signals below the 40% skip threshold.
 
 ---
 
-## 2. Entry Qualification Gates
+## 3. Entry Qualification Gates
 
 All gates must pass. Evaluated in order — first failure = SKIP.
 
@@ -74,7 +92,7 @@ sector_exposure = sum(position_value) for all open trades in same sector
 
 ---
 
-## 3. Position Sizing
+## 4. Position Sizing
 
 Once entry is qualified, size is calculated in four steps:
 
@@ -127,11 +145,14 @@ shares               = floor(adjusted_risk / (atr × atr_multiplier))
 
 ---
 
-## 4. Decision Flow
+## 5. Decision Flow
 
 ```
 Signal arrives
   (pattern, confidence_score, sector, sector_trend, entry_price, atr)
+  # pattern ∈ {ascending_triangle, descending_triangle, rising_channel, falling_channel}
+  │
+  ├─ Resolve pattern direction (bullish/bearish from pattern catalogue)
   │
   ├─ Compute effective_confidence
   │    = confidence_score × sector_alignment_mult
@@ -152,7 +173,7 @@ Signal arrives
 
 ---
 
-## 5. Output (TradeDecision Object)
+## 6. Output (TradeDecision Object)
 
 ```json
 {
@@ -181,7 +202,7 @@ Signal arrives
 
 ---
 
-## 6. Config Parameters
+## 7. Config Parameters
 
 ```yaml
 base_risk_pct: 0.01          # 1% of portfolio per trade
@@ -199,7 +220,7 @@ sector_alignment:
 
 ---
 
-## 7. Proposed Repo Structure
+## 8. Proposed Repo Structure
 
 ```
 stock-trade-decider/
@@ -220,20 +241,23 @@ stock-trade-decider/
 
 ---
 
-## 8. Open Questions
+## 9. Resolved Decisions
 
-1. **Pattern types** — what patterns does upstream produce? Different patterns may warrant different `sector_alignment_mult` values (e.g. reversal patterns might be penalized more on sector mismatch).
-2. **ATR source** — computed by upstream and passed in, or does the decider fetch it?
-3. **Asset class** — stocks only for now?
-4. **Execution target** — broker API, CSV output, or recommendation UI?
+| Question | Decision |
+|----------|----------|
+| ATR source | Passed in upstream — pre-computed, part of signal input |
+| Pattern types | ascending_triangle, descending_triangle, rising_channel, falling_channel (more TBD) |
+| Asset class | Stocks only |
+| Execution target | Recommendation response — JSON output, no broker integration |
 
 ---
 
 ## Next Steps
 
 - [x] Define inputs and effective confidence calculation
+- [x] Define pattern catalogue and direction mapping
 - [x] Define entry qualification gates
 - [x] Define position sizing equations with sector factored in
-- [ ] Confirm config defaults and open questions
+- [x] Resolve open questions
 - [ ] Define exit conditions (stop loss, take profit, trailing stop)
 - [ ] Scaffold repo and implement
