@@ -30,16 +30,26 @@ A decision engine that answers:
 
 Each pattern has an inherent direction. This drives the sector alignment check.
 
-| Pattern | Direction | Nature |
-|---------|-----------|--------|
-| `ascending_triangle` | Bullish | Continuation — higher lows pressing resistance |
-| `descending_triangle` | Bearish | Continuation — lower highs pressing support |
-| `rising_channel` | Bullish | Continuation — price trending up in parallel channel |
-| `falling_channel` | Bearish | Continuation — price trending down in parallel channel |
+| Pattern | Direction | Category | Nature |
+|---------|-----------|----------|--------|
+| `ascending_triangle` | Bullish | Basic | Horizontal resistance + rising support; converging |
+| `descending_triangle` | Bearish | Basic | Horizontal support + falling resistance; converging |
+| `rising_channel` | Bullish | Basic | Parallel rising support & resistance; continuation |
+| `falling_channel` | Bearish | Basic | Parallel falling support & resistance; continuation |
+| `head_and_shoulders` | Bearish | Reversal | 3 peaks (head highest); neckline break triggers |
+| `inverse_head_and_shoulders` | Bullish | Reversal | 3 troughs (head lowest); neckline break triggers |
+| `double_top` | Bearish | Reversal | 2 peaks at same level (±2%); valley retracement ≥5% |
+| `double_bottom` | Bullish | Reversal | 2 troughs at same level (±2%); peak retracement ≥5% |
+| `bull_flag` | Bullish | Continuation | Flagpole ≥8% in ≤20 days + downward consolidation |
+| `bull_flag_v2` | Bullish | Continuation | Enhanced bull flag with tighter consolidation & breakout buffer |
+| `bear_flag` | Bearish | Continuation | Flagpole >5% drop in <5 days + upward consolidation channel |
 
-> All four are **continuation patterns** — they assume the prevailing trend persists.
-> This matters for sector alignment: a continuation pattern *against* the sector
-> trend is a stronger warning signal than a reversal pattern would be.
+> **Category matters for sector alignment interpretation:**
+> - **Continuation** patterns *against* sector trend are a stronger warning (trend fighting trend)
+> - **Reversal** patterns *against* sector trend are less penalised — they may be early and correct
+>
+> For now the sector alignment multiplier is applied uniformly across all patterns.
+> Future: apply softer penalty multiplier for reversal patterns contradicting sector trend.
 
 ---
 
@@ -220,7 +230,9 @@ No partial exits. Each trigger closes the entire position.
 ```
 Signal arrives
   (pattern, confidence_score, sector, sector_trend, entry_price, atr)
-  # pattern ∈ {ascending_triangle, descending_triangle, rising_channel, falling_channel}
+  # pattern ∈ {ascending_triangle, descending_triangle, rising_channel, falling_channel,
+  #             head_and_shoulders, inverse_head_and_shoulders, double_top, double_bottom,
+  #             bull_flag, bull_flag_v2, bear_flag}
   │
   ├─ Resolve pattern direction (bullish/bearish from pattern catalogue)
   │
@@ -330,7 +342,7 @@ stock-trade-decider/
 | Question | Decision |
 |----------|----------|
 | ATR source | Passed in upstream — pre-computed, part of signal input |
-| Pattern types | ascending_triangle, descending_triangle, rising_channel, falling_channel (more TBD) |
+| Pattern types | All 11 upstream patterns mapped — see Section 1 |
 | Asset class | Stocks only |
 | Execution target | Recommendation response — JSON output, no broker integration |
 
@@ -347,11 +359,12 @@ Items consciously skipped for v1. Revisit after core is working.
 | Measured move take profit | Pattern geometry (e.g. triangle height projected from breakout); R:R used for now |
 | Partial exits | e.g. take half off at 1.5R, let rest run; full exit only for now |
 | Per-pattern R:R ratio | Different patterns may warrant different targets (e.g. 2R for flags, 3R for triangles) |
+| Category-aware sector alignment penalty | Reversal patterns deserve a softer contradiction penalty than continuation patterns — currently uniform |
 
 ### Signals & Patterns
 | Item | Context |
 |------|---------|
-| Expand pattern catalogue | Only 4 patterns in v1; bull_flag, cup_and_handle, head_and_shoulders etc. to be added |
+| ~~Expand pattern catalogue~~ | ~~Resolved~~ — all 11 upstream patterns now in plan |
 | Candle/volume confirmation on entry | Filter false breakouts; not in v1 signal spec |
 | Time-based exit | Max hold period (e.g. 20 days) if neither stop nor target hit |
 
