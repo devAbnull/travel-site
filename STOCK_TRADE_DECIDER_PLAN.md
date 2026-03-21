@@ -145,7 +145,77 @@ shares               = floor(adjusted_risk / (atr × atr_multiplier))
 
 ---
 
-## 5. Decision Flow
+## 5. Exit Conditions
+
+Three exits, evaluated continuously while a position is open. First trigger wins → full exit.
+
+### A. Stop Loss
+```
+stop_loss = entry_price - (atr × atr_multiplier)    # bullish patterns
+stop_loss = entry_price + (atr × atr_multiplier)    # bearish patterns
+
+stop_distance = atr × atr_multiplier                # e.g. ATR 3.20 × 1.5 = 4.80
+```
+Exit immediately at full size if price crosses `stop_loss`.
+
+> **Future:** Replace ATR-based stop with pattern invalidation level
+> (e.g. break below ascending trendline) when upstream provides key price levels.
+
+---
+
+### B. Take Profit
+R:R ratio — target a fixed multiple of the initial risk taken.
+
+```
+risk_per_share  = stop_distance                      # dollars at risk per share
+take_profit     = entry_price + (risk_per_share × rr_ratio)   # bullish
+take_profit     = entry_price - (risk_per_share × rr_ratio)   # bearish
+```
+
+Default `rr_ratio = 2.0` (target 2× the risk). Configurable per risk appetite.
+
+**Example:**
+```
+entry       = 175.00
+stop_loss   = 170.20   → stop_distance = 4.80
+rr_ratio    = 2.0
+take_profit = 175.00 + (4.80 × 2.0) = 184.60
+```
+
+> **Future:** Replace or supplement with pattern measured move
+> (e.g. triangle height projected from breakout) for geometrically-grounded targets.
+
+---
+
+### C. Trailing Stop
+Locks in gains once the trade moves in favour. Activates at 1R profit.
+
+```
+trailing_activation = entry_price + (stop_distance × 1.0)    # bullish: up 1R
+trailing_activation = entry_price - (stop_distance × 1.0)    # bearish: down 1R
+
+trail_distance      = atr × atr_multiplier                   # same as stop distance
+
+# Once activated, trail price moves only in trade direction:
+trailing_stop (bullish) = max(price_so_far) - trail_distance
+trailing_stop (bearish) = min(price_so_far) + trail_distance
+```
+
+Exit at full size if price crosses the trailing stop after activation.
+
+---
+
+### Exit Priority
+```
+1. Stop loss hit?         → EXIT (loss)
+2. Take profit hit?       → EXIT (full gain)
+3. Trailing stop hit?     → EXIT (partial gain, locked in)
+```
+No partial exits. Each trigger closes the entire position.
+
+---
+
+## 6. Decision Flow
 
 ```
 Signal arrives
@@ -167,6 +237,12 @@ Signal arrives
   │    adjusted_risk = base_risk × confidence_mult × sector_penalty
   │    shares        = floor(adjusted_risk / stop_distance)
   │    cap shares    to max_position_pct of portfolio
+  │
+  ├─ Compute exits
+  │    stop_loss             = entry ± (atr × atr_multiplier)
+  │    take_profit           = entry ± (stop_distance × rr_ratio)
+  │    trailing_activation   = entry ± (stop_distance × 1.0)
+  │    trail_distance        = atr × atr_multiplier
   │
   └─ Output TradeDecision
 ```
@@ -192,13 +268,14 @@ Signal arrives
   "shares": 14,
   "position_value": 2450.00,
   "stop_loss": 170.20,
+  "take_profit": 184.60,
+  "trailing_stop_activation": 179.80,
+  "trail_distance": 4.80,
+  "reward_risk_ratio": 2.0,
   "risk_amount": 67.20,
   "risk_pct_of_portfolio": 0.67,
   "skip_reason": null
 }
-```
-
-> Exit fields (`take_profit`, `trailing_stop`) will be added in next phase.
 
 ---
 
@@ -216,6 +293,13 @@ sector_alignment:
   confirms: 1.10
   neutral:  1.00
   contradicts: 0.75
+
+exits:
+  rr_ratio: 2.0                # take profit at 2× risk
+  trailing_activation_r: 1.0  # activate trailing stop at 1R profit
+  # future: pattern_invalidation_level (from upstream)
+  # future: rr_ratio per pattern type
+  # future: measured_move target (pattern geometry)
 ```
 
 ---
@@ -259,5 +343,5 @@ stock-trade-decider/
 - [x] Define entry qualification gates
 - [x] Define position sizing equations with sector factored in
 - [x] Resolve open questions
-- [ ] Define exit conditions (stop loss, take profit, trailing stop)
+- [x] Define exit conditions (stop loss, take profit, trailing stop)
 - [ ] Scaffold repo and implement
