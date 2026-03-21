@@ -336,6 +336,42 @@ stock-trade-decider/
 
 ---
 
+## 10. Future Scope (Deferred — Plan Later)
+
+Items consciously skipped for v1. Revisit after core is working.
+
+### Exits
+| Item | Context |
+|------|---------|
+| Pattern invalidation level as stop | Upstream would need to pass key price level (e.g. trendline price); ATR used for now |
+| Measured move take profit | Pattern geometry (e.g. triangle height projected from breakout); R:R used for now |
+| Partial exits | e.g. take half off at 1.5R, let rest run; full exit only for now |
+| Per-pattern R:R ratio | Different patterns may warrant different targets (e.g. 2R for flags, 3R for triangles) |
+
+### Signals & Patterns
+| Item | Context |
+|------|---------|
+| Expand pattern catalogue | Only 4 patterns in v1; bull_flag, cup_and_handle, head_and_shoulders etc. to be added |
+| Candle/volume confirmation on entry | Filter false breakouts; not in v1 signal spec |
+| Time-based exit | Max hold period (e.g. 20 days) if neither stop nor target hit |
+
+### Risk & Portfolio
+| Item | Context |
+|------|---------|
+| Correlation-aware sizing | Reduce size when two positions are highly correlated, not just same sector |
+| Dynamic ATR multiplier | Widen stop in high-VIX environments, tighten in low-vol |
+| Per-sector R:R or risk% override | Some sectors (e.g. biotech) may need different risk caps |
+| Drawdown circuit breaker | Pause trading if portfolio drops X% in a rolling window |
+
+### Infrastructure
+| Item | Context |
+|------|---------|
+| Broker integration | Currently JSON recommendation only; live order routing is out of scope |
+| Backtesting harness | Replay historical signals through decider to validate config |
+| Real-time ATR feed | ATR is passed in pre-computed; future: compute internally from price feed |
+
+---
+
 ## Next Steps
 
 - [x] Define inputs and effective confidence calculation
@@ -344,4 +380,5 @@ stock-trade-decider/
 - [x] Define position sizing equations with sector factored in
 - [x] Resolve open questions
 - [x] Define exit conditions (stop loss, take profit, trailing stop)
+- [x] Document future scope / deferred items
 - [ ] Scaffold repo and implement
